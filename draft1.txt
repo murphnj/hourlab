@@ -1,0 +1,106 @@
+Create your Centos homelab in an hour.
+
+What is required:
+
+A host computer with virtualization software loaded.:
+	My example will use Fedora for the host, and KVM for the virtualization software.  
+		Centos would work basically the same.
+	Other computers such as Windows or Mac would be OK, but you will have to change a few of the implemntationn details to suit your platform.
+
+A downloaded .iso file of the distro that you want to run your lab on (RedHat, Centos, Scientific or a related version)
+
+
+First, we'll create our local repository.
+
+Starting up:
+Start virt-manager, and select a new VM.
+Select "Local install media" and Press "Forward"
+Select "Use ISO image" and browse.  
+At the "Choose local Storage Volume" select "Browse local" and navigate to the .iso for your distro.
+Select "Forward"
+Choose your memory and CPU options, 1G and 1cpu is fine for the repo, less may even work. Select Foward
+For the Disk image, I'd reccomend about 16G, so that you have room for the files. Select forward
+Then name your VM, somethign that will show you that it is the repo. Press finish
+
+Centos will go to a text screen, select Install Centos 7, unless you want to test your media, in thaty case select that.
+The graphical install will start - select your language and continue
+In the Installation summary, select istallation destination, allow the installer to do Automatic installation, and click done in the upper left hand corner.
+Under Software installation, select "infrastructure server" and be sure to select the "FTP server" checkbox, and click "done"
+Now click begin installation!
+"Network and host name" , make sure that ethernet is enabled.
+You have an opportunity to create accounts and passwords for root, and a user account, this is a good opportunity to do so.
+Now we wait (16:20-16:25)
+When it finished, select Reboot
+
+log in as root, using your selected password from before
+
+Setting up your ftp server, and the local repository.
+Start the ftp server : 		systemctl start vsftpd
+Enable it for next time : 	systemctl enable vsftpd
+Check it :			systemctl status vsftpd
+
+Mount the installation cd, and copy the files to a directory for ftp use.
+Go to "View->details" select ide cdrom1 - click connect - browse (just like the inital iso selection) click OK
+Go to "View->console" to go back to your VM.
+
+Make a temporary mount point for your cd, and mount the cd to it.
+mkdir /root/temp ; mount  /dev/cdrom/temp; ls /root/temp
+
+Use the pub folder for your files, copy from the source CD to it:
+rsync -avhP /root/temp /var/ftp/pub
+And we wait 16:55-16:58
+
+Create your local (to this server) repository.
+cd /etc/yum.repos.d
+Move all the existing repos to the root direcory (in case you need them later)
+mv * ~
+Create your new repository
+<edit> local.repo
+# it needs to have the following format
+[local]
+name=local
+baseurl=file:/var/ftp/pub
+gpgcheck=0
+save and quit
+
+chek your repo to see if it is working:
+yum clean all
+yum install ftp
+
+If it works, continue!
+
+Now, we have to check our ftp server, and open it to the local network.
+
+ftp localhost
+When it asks for name, select anonymous
+For password, enter a valid email address
+cd pub
+ls
+--You should see the copy of the files form your installation cd
+quit
+Allow forewall access to the server for ftp
+firewall-cmd --enable-service=ftp --permanent
+(Check networking, if forgotten, use nmtui to enable) - should be done earlier
+Get your ip address:  ip a  -> make a note of it.
+
+
+Your repo server is done, let's creat our first test vm.
+
+Go back to the network manager:
+Seleect a new VM as before, but instead of local CD, we are going to select a network install:
+For URL, we will type:   ftp://192.168.122.52/pub
+(If you see your OS type and Version show up, you're in good shape)
+forward
+Memory, cpus, and disk to taste, forward, forward
+Name the vm, and Finish
+Your VM should boot from the network drive that we just set up.  Set up your VM as you like, and you will have hte same OS version across both VMs.
+
+
+The final step, create your network repo for the new server, it is similar to the lcoal one we created, but like this:
+
+[network]
+name=network
+baseurl=ftp://192.168.122.52/pub
+gpgcheck=0
+
+Now, the new vm willl get updates and software just from the repo vm, not the internet, no requirement for network access to create and install software.
