@@ -1,0 +1,70 @@
+Create your CentOS homelab in about an hour.
+
+<h1>Set up a self-sustained set of basic Linux servers with nothing more than a system with virtualization software, a CentOS ISO and about an hour of your time.
+
+When working on new Linux skills, or as I was, studying for a Linux certification, it is helpful to have a few VMs available on your laptop so that you can do some learning on the go.
+
+But what happens if you are working, somewhere without a good internet connection, and you would like to work on a web server, or any other software that you don't have installed already?  If you were depending on downloading from the distribution's repositories, you may be out of luck.  With a bit of preparation, we can set up a lab that will allow you to install anything that you need wherever you are, with or without a network connection.
+
+The requirements for setting this up are:
+-- A downloaded .iso file of the distribution that you intend to use.  (CentOS, or anything in the Red Hat family for my examples)
+-- A host computer with virtualization.  I use Fedora with KVM and virt-manager, but any Linux would work roughly like this, and one could use Windows or Mac with virtualization, with some difference in implementation.
+-- About an hour of time.
+
+<h2>First, we'll create a VM for use as our repository host.  
+Use Virtual-manager to create a VM with modest specs. 1G of RAM, 1 CPU, and 16G of disk space is plenty.
+Install CentOS 7 on the VM.
+Select your language, and continue.
+Click "installation destination", your locl disk should be checked, make sure "Automatically configure partitioning" is selected, and click "Done" in the upper left hand corner.
+Under "Software Selection", select "Infrastucture Server", select the "FTP server" checkbox, and click "Done"
+Select "Network and Host Name", and enable Ethernet in the upper right, then click "Done" in the upper left.
+Click "Begin Installation" to start installing the OS.
+You must create a root password, and you may create a user with password as it installs.
+
+<h2>Next, we'll start and set the ftp service to run, and allow it through the firewall.
+Log in with your root password.
+Start the ftp server with <code>systemctl start vsftpd</code>
+Enable it to work on every start with <code>systemctl enable vsftpd</code>
+Set the port as allowed through the firewall <code>firewall-cmd --add-service=ftp --perm</code>
+Enable the above change immediately <code>firewall-cmd --reload</code>
+Get your ip address with <code>ip a</code>  We'll need it in a minute.
+
+<h2>Copy the files for our local repository.
+Mount the cd that we installed from to our vm through your virtualization software.
+Create a directory for the cd to be mounted to temporarily.  <code>mkdir /root/temp</code>
+Mount the install cd <code>mount /dev/cdrom /temp</code>
+Copy all the files to the ftp server directory. <code>scp -r /root/temp/ /var/ftp/pub</code>
+
+<h2>Create the file to point the server to the local repository
+Those files can be found at <code>cd /etc/yum.repos.d</code>
+We need to get rid of the repo files that will point our server to look to the CentOS reporistories on the internet. (I prefer to copy them to root's home directory to get them out of the way)<code>mv * ~</code>
+Then we're going to create a new repo file to point to our server. Use your favorite editor to create the file "network.repo" with the following required lines, then save:
+<code>[network]
+name=network
+baseurl=ftp://192.168.122.<your ip>/pub
+gpgcheck=0
+</code>
+When that's done, we can test it out with the following:
+<code>yum clean all; yum install ftp</code>
+If your ftp client installs as expected from the "network" repository, we have our local repo set up!
+
+<h2>Install a new VM, using the already set up repository
+Go back to the virtual machine manager, and when you create a VM this time, select "Network install" with a url of "ftp://192.168.122.<your IP>/pub"
+If you've used a different host OS or virtualization manager, please install your VM similarly to before, and skip to the next section.
+
+<h2>Set the new VM to use our existing network repository
+We can copy the repo file from out existing server to use here.
+As in our first server example, first:  
+<code>cd /etc/yum.repos.d</code>
+<code>mv * ~</code>
+then:
+<code>scp root@192.168.122.<your IP>:/etc/yum.repos.d/network.repo /etc/yum.repos.d</code>
+
+Now we should be ready to work with our new VM, getting all software from our local repository.
+We can test this again with <code>yum clean all; yum install screen</code>
+
+Which will install our software from our local repo server.
+
+This allows us independance from the network with the ability to install software.  This can make for a much more dependable environment for expanding one's skills on the road.
+
+I'll be giving this talk at <a href="https://southeastlinuxfest.org/">Southeast Linux Fest</a> as well as reprising my earlier talk on <a href="https://opensource.com/article/17/3/introduction-gnu-screen">GNU screen</a> 
