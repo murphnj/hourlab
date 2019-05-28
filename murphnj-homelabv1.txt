@@ -67,4 +67,5 @@ Which will install our software from our local repo server.
 
 This allows us independance from the network with the ability to install software.  This can make for a much more dependable environment for expanding one's skills on the road.
 
-I'll be giving this talk at <a href="https://southeastlinuxfest.org/">Southeast Linux Fest</a> as well as reprising my earlier talk on <a href="https://opensource.com/article/17/3/introduction-gnu-screen">GNU screen</a> 
+I'll be giving this talk on Saturday, June 15th at <a href="https://southeastlinuxfest.org/">Southeast Linux Fest</a> as well as reprising my earlier talk on <a href="https://opensource.com/article/17/3/introduction-gnu-screen">GNU screen</a> the following Sunday.  Hope to see you there!
+
