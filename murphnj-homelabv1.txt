@@ -15,8 +15,8 @@ The requirements for setting this up are:
 Use Virtual-manager to create a VM with modest specs. 1G of RAM, 1 CPU, and 16G of disk space is plenty.
 Install CentOS 7 on the VM.
 Select your language, and continue.
-Click "installation destination", your locl disk should be checked, make sure "Automatically configure partitioning" is selected, and click "Done" in the upper left hand corner.
-Under "Software Selection", select "Infrastucture Server", select the "FTP server" checkbox, and click "Done"
+Click "installation destination", your local disk should be checked, make sure "Automatically configure partitioning" is selected, and click "Done" in the upper left hand corner.
+Under "Software Selection", select "Infrastructure Server", select the "FTP server" checkbox, and click "Done"
 Select "Network and Host Name", and enable Ethernet in the upper right, then click "Done" in the upper left.
 Click "Begin Installation" to start installing the OS.
 You must create a root password, and you may create a user with password as it installs.
@@ -36,8 +36,8 @@ Mount the install cd <code>mount /dev/cdrom /temp</code>
 Copy all the files to the ftp server directory. <code>scp -r /root/temp/ /var/ftp/pub</code>
 
 <h2>Create the file to point the server to the local repository
-Those files can be found at <code>cd /etc/yum.repos.d</code>
-We need to get rid of the repo files that will point our server to look to the CentOS reporistories on the internet. (I prefer to copy them to root's home directory to get them out of the way)<code>mv * ~</code>
+Red Hat based systems use files that end in .repo to tell where to get updates and new software from.  Those files can be found at <code>cd /etc/yum.repos.d</code>
+We need to get rid of the repo files that will point our server to look to the CentOS repositories on the internet. (I prefer to copy them to root's home directory to get them out of the way)<code>mv * ~</code>
 Then we're going to create a new repo file to point to our server. Use your favorite editor to create the file "network.repo" with the following required lines, then save:
 <code>[network]
 name=network
