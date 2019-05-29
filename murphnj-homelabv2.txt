@@ -53,7 +53,7 @@ Go back to the virtual machine manager, and when you create a VM this time, sele
 If you've used a different host OS or virtualization manager, please install your VM similarly to before, and skip to the next section.
 
 <h2>Set the new VM to use our existing network repository
-We can copy the repo file from out existing server to use here.
+We can copy the repo file from our existing server to use here.
 As in our first server example, first:  
 <code>cd /etc/yum.repos.d</code>
 <code>mv * ~</code>
